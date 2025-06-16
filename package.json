@@ -1,0 +1,33 @@
+{
+  "name": "llm",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@bull-board/api": "^6.10.1",
+    "@bull-board/fastify": "^6.10.1",
+    "@bull-board/ui": "^6.10.1",
+    "@fastify/autoload": "^6.3.1",
+    "@fastify/cors": "^11.0.1",
+    "@google/genai": "^1.4.0",
+    "@google/generative-ai": "^0.24.1",
+    "async-mutex": "^0.5.0",
+    "axios": "^1.9.0",
+    "bullmq": "^5.53.2",
+    "dotenv": "^16.5.0",
+    "fastify": "^5.3.3",
+    "fastify-cors": "^6.0.3",
+    "fastify-env": "^2.1.1",
+    "ioredis": "^5.6.1",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "uuid": "^11.1.0"
+  }
+}
