@@ -1,26 +1,18 @@
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
+dotenv.config({ path: '../../.env' });
 import { Worker } from 'bullmq';
 import Redis from 'ioredis';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import geminiService from '../services/geminiService.js';
 import logger from '../utils/logger.js';
-
-// Load environment variables
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-config({ path: `${__dirname}/../../.env` });
-
-console.log('Connecting to Redis at:', process.env.REDIS_HOST, 'port:', process.env.REDIS_PORT);
 
 const redisConnection = new Redis({
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: null,
+  maxRetriesPerRequest: 3,
   enableOfflineQueue: true,
   retryStrategy: (times) => {
-    const delay = Math.min(times * 1000, 5000); // Increased delay for better retry
+    const delay = Math.min(times * 1000, 5000);
     console.log(`Redis connection attempt ${times}, retrying in ${delay}ms...`);
     return delay;
   },
@@ -28,14 +20,6 @@ const redisConnection = new Redis({
     console.error('Redis connection error:', err.message);
     return true; // Reconnect on error
   }
-});
-
-redisConnection.on('connect', () => {
-  console.log('Successfully connected to Redis');
-});
-
-redisConnection.on('error', (err) => {
-  console.error('Redis error:', err);
 });
 
 const worker = new Worker('llm-prompts', async (job) => {

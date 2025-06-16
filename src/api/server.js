@@ -21,18 +21,39 @@ config({ path: path.resolve(__dirname, '../../.env') });
 const start = async () => {
   try {
     // Register plugins
-    await fastify.register(redisPlugin);
-    await fastify.register(bullmqPlugin);
-    await fastify.register(dashboardPlugin, {
-      basePath: '/admin/queues', // You can configure the path here
-    });
+    try {
+      await fastify.register(redisPlugin);
+    } catch (err) {
+      logger.error("Error registering redisPlugin:", err);
+      process.exit(1);
+    }
 
-    
+    try {
+      await fastify.register(bullmqPlugin);
+    } catch (err) {
+      logger.error("Error registering bullmqPlugin:", err);
+      process.exit(1);
+    }
+
+    try {
+      await fastify.register(dashboardPlugin, {
+        basePath: '/admin/queues', // You can configure the path here
+      });
+    } catch (err) {
+      logger.error("Error registering dashboardPlugin:", err);
+      process.exit(1);
+    }
+
     // Register routes
-    await fastify.register((instance, opts, done) => {
-      instance.register(llmPromptRoutes, { prefix: '/api' });
-      done();
-    });
+    try {
+      await fastify.register((instance, opts, done) => {
+        instance.register(llmPromptRoutes, { prefix: '/api' });
+        done();
+      });
+    } catch (err) {
+      logger.error("Error registering routes:", err);
+      process.exit(1);
+    }
 
     const port = process.env.API_PORT || 3000;
     await fastify.listen({ port });

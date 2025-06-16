@@ -17,7 +17,6 @@
     "@fastify/autoload": "^6.3.1",
     "@fastify/cors": "^11.0.1",
     "@google/genai": "^1.4.0",
-    "@google/generative-ai": "^0.24.1",
     "async-mutex": "^0.5.0",
     "axios": "^1.9.0",
     "bullmq": "^5.53.2",

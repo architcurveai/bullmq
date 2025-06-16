@@ -14,7 +14,7 @@ module.exports = {
     {
       name: 'llm-worker',
       script: './src/worker/llmWorker.js',
-      instances: 3,
+      instances: 1,
       watch: ['./src/worker', './src/services', './src/dashboard'],
       env: {
         NODE_ENV: 'production',

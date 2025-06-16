@@ -1,104 +1,147 @@
-Start the API and Workers: Use PM2 to manage the application.
+# LLM API and Worker Service
 
+## Description
 
-pm2 start ecosystem.config.js
+This project provides an API and worker service for processing Large Language Model (LLM) prompts using BullMQ for queue management, Redis for data storage, and Google Gemini for LLM interactions. The API exposes endpoints for submitting prompts, while the worker processes these prompts in the background. A dashboard is also included for monitoring the queues.
 
+## Features
 
-Check Status: You can monitor the processes using:
+*   **API for submitting LLM prompts:** Allows users to submit prompts for processing.
+*   **Background processing of prompts:** Uses BullMQ to queue and process prompts asynchronously.
+*   **Redis for data storage:** Stores queue data and other relevant information in Redis.
+*   **Google Gemini integration:** Leverages the Google Gemini API for LLM interactions.
+*   **PM2 process management:** Uses PM2 for managing the API and worker processes in production.
+*   **BullMQ Dashboard:** Provides a web interface for monitoring and managing BullMQ queues.
 
+## Installation
 
-pm2 list
-pm2 logs
+1.  **Clone the repository:**
 
+    ```bash
+    git clone <repository_url>
+    cd llm
+    ```
 
+2.  **Install dependencies:**
 
-PS C:\jee_module\LLM> node clearQueue.js
-REDIS_HOST: redis-12569.c61.us-east-1-3.ec2.redns.redis-cloud.com
-REDIS_PORT: 12569
-REDIS_PASSWORD: ******
-[11:18:23.523] INFO (24948): Connecting to queue: llm-prompts
-IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
-[11:18:24.886] INFO (24948): Successfully obliterated all tasks in the 'llm-prompts' queue.
+    ```bash
+    npm install
+    ```
 
+3.  **Configure environment variables:**
 
+    Create a `.env` file in the project root with the following variables:
 
-C:\jee_module\LLM> pm2 stop all
-[PM2] Applying action stopProcessId on app [all](ids: [ 0, 1, 2, 3 ])
-[PM2] [llm-worker](1) ✓
-[PM2] [llm-api](0) ✓
-[PM2] [llm-worker](2) ✓
-[PM2] [llm-worker](3) ✓
-┌────┬───────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
-│ id │ name          │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
-├────┼───────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 0  │ llm-api       │ default     │ 1.0.0   │ cluster │ 0        │ 0      │ 213  │ stopped   │ 0%       │ 0b       │ Dell     │ disabled │
-│ 1  │ llm-worker    │ default     │ 1.0.0   │ cluster │ 0        │ 0      │ 3    │ stopped   │ 0%       │ 0b       │ Dell     │ disabled │
-│ 2  │ llm-worker    │ default     │ 1.0.0   │ cluster │ 0        │ 0      │ 3    │ stopped   │ 0%       │ 0b       │ Dell     │ disabled │
-│ 3  │ llm-worker    │ default     │ 1.0.0   │ cluster │ 0        │ 0      │ 3    │ stopped   │ 0%       │ 0b       │ Dell     │ disabled │
-└────┴───────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+    ```
+    API_PORT=3000
+    REDIS_HOST=<redis_host>
+    REDIS_PORT=<redis_port>
+    REDIS_PASSWORD=<redis_password>
+    GOOGLE_API_KEY=<google_api_key>
+    ```
 
+    Replace the placeholders with your actual values.
 
+## Configuration
 
+The application can be configured using environment variables. The following variables are available:
 
-PS C:\jee_module\LLM> pm2 start ecosystem.config.cjs
-[PM2] Applying action restartProcessId on app [llm-worker](ids: [ 1, 2, 3 ])
-[PM2] Applying action restartProcessId on app [llm-api](ids: [ 0 ])
-[PM2] [llm-worker](1) ✓
-[PM2] [llm-worker](2) ✓
-[PM2] [llm-api](0) ✓
-[PM2] [llm-worker](3) ✓
-┌────┬───────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
-│ id │ name          │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
-├────┼───────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 0  │ llm-api       │ default     │ 1.0.0   │ cluster │ 13940    │ 1s     │ 168  │ online    │ 34.4%    │ 56.8mb   │ Dell     │ disabled │
-│ 1  │ llm-worker    │ default     │ 1.0.0   │ cluster │ 19828    │ 1s     │ 1    │ online    │ 45.3%    │ 67.9mb   │ Dell     │ enabled  │
-│ 2  │ llm-worker    │ default     │ 1.0.0   │ cluster │ 22276    │ 1s     │ 1    │ online    │ 37.5%    │ 64.5mb   │ Dell     │ enabled  │
-│ 3  │ llm-worker    │ default     │ 1.0.0   │ cluster │ 28860    │ 0s     │ 1    │ online    │ 59.3%    │ 50.1mb   │ Dell     │ enabled  │
-└────┴───────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+*   `API_PORT`: The port on which the API server will listen (default: 3000).
+*   `REDIS_HOST`: The hostname or IP address of the Redis server.
+*   `REDIS_PORT`: The port number of the Redis server.
+*   `REDIS_PASSWORD`: The password for the Redis server.
+*   `GOOGLE_API_KEY`: The API key for the Google Gemini API.
 
+## Usage
 
+1.  **Start the Redis server:**
 
+    Ensure that the Redis server is running and accessible.
 
-You need to explicitly tell PM2 to stop the applications.
+2.  **Start the API and worker processes:**
 
-PowerShell
+    Use PM2 to manage the application:
 
-# To stop all running applications/task/worker
-pm2 stop all
+    ```bash
+    pm2 start ecosystem.config.cjs
+    ```
 
-# To restart all applications/task/worker (useful after changing .env)
-pm2 restart all
+3.  **Access the API:**
 
-# To completely remove them from PM2's list
-pm2 delete all
+    The API server will be running on the configured port (default: 3000). You can access the API endpoints at `http://localhost:3000/api`.
 
+4.  **Access the BullMQ Dashboard:**
 
+    The BullMQ dashboard is available at `http://localhost:3000/admin/queues`.
 
+## Microservice Deployment
 
-How it works (simplified):
+This project can be deployed as a microservice on any platform that supports Node.js and PM2. To deploy the application, follow these steps:
 
-When a worker process starts, it initializes the BullMQ Worker instance.
-BullMQ establishes a connection to Redis.
-The worker enters an event loop. It waits for messages from Redis (new jobs, job updates, etc.).
-When a job is available and a lock is acquired, the worker's handler function (your custom logic) is executed.
-Because Node.js is single-threaded for JavaScript execution, a single worker process processes one job at a time. However, due to Node.js's non-blocking I/O, if your job involves network calls (e.g., downloading an image) or database queries, the worker won't sit idle during those waits; it can briefly context-switch to handle other internal events while waiting for the I/O operation to complete.
+1.  **Build the application:**
 
+    ```bash
+    npm install
+    ```
 
+2.  **Configure environment variables:**
 
+    Set the environment variables required for the application to run.
 
-Note  : To check particular port  : 
+3.  **Deploy the application:**
 
-netstat -ano | findstr :3000
+    Use PM2 to manage the application:
 
-TCP    127.0.0.1:3000         0.0.0.0:0              LISTENING       16332
-TCP    [::1]:3000             [::]:0                 LISTENING       16332
-TCP    [::1]:3000             [::1]:61630            ESTABLISHED     16332
-TCP    [::1]:61630            [::1]:3000             ESTABLISHED     1772
+    ```bash
+    pm2 start ecosystem.config.cjs
+    ```
 
-Note : check PID
-tasklist /FI "PID eq 16332"
+## API Endpoints
 
-Note : kill PID
-taskkill /PID 16332 /F
+The following API endpoints are available:
 
-Note : Now port is Free to user 
+*   `POST /api/llmPrompt`: Submits a new LLM prompt for processing.
+
+## Task Status and Monitoring
+
+The status of tasks can be monitored via the API. The following statuses are available:
+
+*   `queued`: The task has been enqueued and is waiting to be processed.
+*   `processing`: The task is currently being processed by a worker.
+*   `completed`: The task has been successfully completed.
+*   `failed`: The task has failed to complete.
+
+## Monitoring Task Status
+
+To check the status of a task, use the following API endpoint:
+
+`GET /api/llmPrompt/:taskId`
+
+This endpoint will return a JSON object with the following properties:
+
+*   `taskId`: The ID of the task.
+*   `status`: The current status of the task.
+*   `response`: The response from the LLM, if the task has completed successfully.
+
+## Handling Task Failures
+
+If a task fails, the `status` property will be set to `failed`. The reason for the failure can be found in the logs of the worker process.
+
+## Dashboard
+
+The BullMQ dashboard provides a web interface for monitoring and managing BullMQ queues. You can use the dashboard to:
+
+*   View the status of queues.
+*   Inspect jobs in the queues.
+*   Retry or remove jobs.
+*   Pause or resume queues.
+
+The dashboard is available at `http://localhost:3000/admin/queues`.
+
+## Contributing
+
+Contributions are welcome! Please submit a pull request with your changes.
+
+## License
+
+ISC
